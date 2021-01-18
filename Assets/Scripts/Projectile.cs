@@ -13,10 +13,25 @@ public class Projectile : NetworkBehaviour
         rigidbody2d.simulated = true;
     }
 
+    private float lifetimeLeft = 20;
+    private void Update()
+    {
+        lifetimeLeft -= Time.deltaTime;
+
+        if (lifetimeLeft <= 0)
+        {
+            NetworkServer.Destroy(gameObject);
+            Destroy(gameObject);
+        }
+    }
+
     // only call this on server
     [ServerCallback]
     void OnCollisionEnter2D(Collision2D col)
     {
-        NetworkServer.Destroy(col.gameObject);
+        if (!col.gameObject.CompareTag("projectile"))
+        {
+            NetworkServer.Destroy(col.gameObject);
+        }
     }
 }

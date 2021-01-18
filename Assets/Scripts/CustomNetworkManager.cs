@@ -19,18 +19,10 @@ public class CustomNetworkManager : NetworkManager
         var positionToSpawn = numPlayers == 0 ? firstPosition : secondPosition;
         var player = Instantiate(playerPrefab, positionToSpawn.position, positionToSpawn.rotation);
 
-        //if (numPlayers > 0)
-        //{
-        //    player.GetComponent<SpriteRenderer>().color = Color.green;
-        //}
-
         NetworkServer.AddPlayerForConnection(conn, player);
 
-        if (numPlayers == 1)
+        if (numPlayers == 2)
         {
-            //ball = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Projectile"));
-            //NetworkServer.Spawn(ball);
-
             StartCoroutine(onCoroutine());
         }
     }
@@ -39,6 +31,11 @@ public class CustomNetworkManager : NetworkManager
     {
         while (true)
         {
+            if (numPlayers == 0)
+            {
+                break;
+            }
+
             var rnd = new System.Random();
             var spawnId = rnd.Next(0, spawners.Length);
             var directionSpawnId = (spawnId + spawners.Length / 2) % spawners.Length;
@@ -49,11 +46,17 @@ public class CustomNetworkManager : NetworkManager
 
             projectile.GetComponent<Rigidbody2D>().velocity = -Vector3.MoveTowards(spawners[spawnId].position, spawners[directionSpawnId].position, projectileVelocity * Time.deltaTime);
 
+            var multiplier = (float) (rnd.NextDouble() + 0.1);
+
+            projectile.GetComponent<Rigidbody2D>().velocity *= projectileVelocity * multiplier;
+
             Debug.Log($"start: {spawnId}, target: {directionSpawnId}");
 
             NetworkServer.Spawn(projectile);
 
-            yield return new WaitForSeconds(5f);
+            var delayTime = rnd.Next(1, 3);
+
+            yield return new WaitForSeconds(delayTime);
         }
     }
 }
