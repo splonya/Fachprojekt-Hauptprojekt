@@ -12,14 +12,14 @@ GameObject:
   - component: {fileID: 3654018108278663671}
   - component: {fileID: 3482133881703066604}
   - component: {fileID: 761429422322809532}
+  - component: {fileID: 948072490664623793}
   - component: {fileID: 9036870393580187186}
   - component: {fileID: 5998996131657957594}
   - component: {fileID: 5862242286165867384}
   - component: {fileID: 6923604346558987790}
   - component: {fileID: 6604425739644701132}
-  - component: {fileID: 948072490664623793}
   m_Layer: 0
-  m_Name: TestPlayer
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,6 +117,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b45b70f6a433cc4aa1c5159764cc260, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &948072490664623793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8144946786006304803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64f212eabd61bfa43be65aa65fee8cf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!60 &9036870393580187186
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -225,17 +239,3 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!114 &948072490664623793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8144946786006304803}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64f212eabd61bfa43be65aa65fee8cf3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1

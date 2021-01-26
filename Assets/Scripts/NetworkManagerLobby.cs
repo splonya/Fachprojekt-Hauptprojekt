@@ -16,8 +16,8 @@ public class NetworkManagerLobby : NetworkManager
 
     [Header("Game")]
     [SerializeField] private NetworkGamePlayerLobby gamePlayerPrefab = null;
-    [SerializeField] private GameObject playerSpawnSystem = null;
-    [SerializeField] private GameObject roundSystem = null;
+    [SerializeField] private GameObject projectilePrefab = null;
+    [SerializeField] private float projectileVelocity = 1;
 
     public static event Action OnClientConnected;
     public static event Action OnClientDisconnected;
@@ -26,6 +26,8 @@ public class NetworkManagerLobby : NetworkManager
 
     public List<NetworkRoomPlayerLobby> RoomPlayers { get; } = new List<NetworkRoomPlayerLobby>();
     public List<NetworkGamePlayerLobby> GamePlayers { get; } = new List<NetworkGamePlayerLobby>();
+
+    private List<Transform> spawners = new List<Transform>();
 
     public override void OnStartServer() => spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
 
@@ -61,27 +63,10 @@ public class NetworkManagerLobby : NetworkManager
             conn.Disconnect();
             return;
         }
-
-        //if (SceneManager.GetActiveScene().name != menuScene)
-        //{
-        //    conn.Disconnect();
-        //    return;
-        //}
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        //if (SceneManager.GetActiveScene().name == menuScene)
-        //{
-        //    bool isLeader = RoomPlayers.Count == 0;
-
-        //    NetworkRoomPlayerLobby roomPlayerInstance = Instantiate(roomPlayerPrefab);
-
-        //    roomPlayerInstance.IsLeader = isLeader;
-
-        //    NetworkServer.AddPlayerForConnection(conn, roomPlayerInstance.gameObject);
-        //}
-
         bool isLeader = RoomPlayers.Count == 0;
 
         NetworkRoomPlayerLobby roomPlayerInstance = Instantiate(roomPlayerPrefab);
@@ -140,35 +125,13 @@ public class NetworkManagerLobby : NetworkManager
 
     public void StartGame()
     {
-        //if (SceneManager.GetActiveScene().name == menuScene)
-        //{
-        //    if (!IsReadyToStart()) { return; }
-
-        //    ServerChangeScene("SampleScene");
-        //}
-
         if (!IsReadyToStart()) { return; }
 
-        ServerChangeScene("Test");
+        ServerChangeScene("SampleScene");
     }
 
     public override void ServerChangeScene(string newSceneName)
     {
-        // From menu to game
-        //if (SceneManager.GetActiveScene().name == menuScene && newSceneName.StartsWith("SampleScene"))
-        //{
-        //    for (int i = RoomPlayers.Count - 1; i >= 0; i--)
-        //    {
-        //        var conn = RoomPlayers[i].connectionToClient;
-        //        var gameplayerInstance = Instantiate(gamePlayerPrefab);
-        //        gameplayerInstance.SetDisplayName(RoomPlayers[i].DisplayName);
-
-        //        NetworkServer.Destroy(conn.identity.gameObject);
-
-        //        NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
-        //    }
-        //}
-
         for (int i = RoomPlayers.Count - 1; i >= 0; i--)
         {
             var conn = RoomPlayers[i].connectionToClient;
@@ -185,14 +148,8 @@ public class NetworkManagerLobby : NetworkManager
 
     public override void OnServerSceneChanged(string sceneName)
     {
-        //if (sceneName.StartsWith("Scene_Map"))
-        //{
-        //    GameObject playerSpawnSystemInstance = Instantiate(playerSpawnSystem);
-        //    NetworkServer.Spawn(playerSpawnSystemInstance);
-
-        //    GameObject roundSystemInstance = Instantiate(roundSystem);
-        //    NetworkServer.Spawn(roundSystemInstance);
-        //}
+        spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
+        StartCoroutine(onCoroutine());
     }
 
     public override void OnServerReady(NetworkConnection conn)
@@ -200,5 +157,38 @@ public class NetworkManagerLobby : NetworkManager
         base.OnServerReady(conn);
 
         OnServerReadied?.Invoke(conn);
+    }
+
+    IEnumerator onCoroutine()
+    {
+        while (true)
+        {
+            if (numPlayers == 0)
+            {
+                break;
+            }
+
+            var rnd = new System.Random();
+            var spawnId = rnd.Next(0, spawners.Count);
+            var directionSpawnId = (spawnId + spawners.Count / 2) % spawners.Count;
+
+            Debug.LogError(spawners[spawnId].position);
+
+            var projectile = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Projectile"), new Vector3(spawners[spawnId].position.x, spawners[spawnId].position.y, 0), Quaternion.identity);
+
+            projectile.GetComponent<Rigidbody2D>().velocity = -Vector3.MoveTowards(spawners[spawnId].position, spawners[directionSpawnId].position, projectileVelocity * Time.deltaTime);
+
+            var multiplier = (float)(rnd.NextDouble() + 0.1);
+
+            projectile.GetComponent<Rigidbody2D>().velocity *= projectileVelocity * multiplier;
+
+            Debug.Log($"start: {spawnId}, target: {directionSpawnId}");
+
+            NetworkServer.Spawn(projectile);
+
+            var delayTime = rnd.Next(1, 3);
+
+            yield return new WaitForSeconds(delayTime);
+        }
     }
 }

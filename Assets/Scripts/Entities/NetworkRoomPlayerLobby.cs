@@ -115,7 +115,7 @@ public class NetworkRoomPlayerLobby : NetworkBehaviour
     }
 
     [Command]
-    public void CmdStartGame()
+    public void CmdStartGame() 
     {
         Room.StartGame();
     }
