@@ -24,6 +24,10 @@ public class NetworkManagerLobby : NetworkManager
     public static event Action<NetworkConnection> OnServerReadied;
     public static event Action OnServerStopped;
 
+    private bool isCoroutineStopped = false;
+
+    private string winnerName;
+
     public List<NetworkRoomPlayerLobby> RoomPlayers { get; } = new List<NetworkRoomPlayerLobby>();
     public List<NetworkGamePlayerLobby> GamePlayers { get; } = new List<NetworkGamePlayerLobby>();
 
@@ -73,7 +77,7 @@ public class NetworkManagerLobby : NetworkManager
 
         roomPlayerInstance.IsLeader = isLeader;
 
-        if (!isLeader)
+        if (!isLeader || SceneManager.GetActiveScene().name == "WinScreen")
         {
             roomPlayerInstance.gameObject.SetActive(false);
         }
@@ -127,11 +131,6 @@ public class NetworkManagerLobby : NetworkManager
     {
         if (!IsReadyToStart()) { return; }
 
-        ServerChangeScene("SampleScene");
-    }
-
-    public override void ServerChangeScene(string newSceneName)
-    {
         for (int i = RoomPlayers.Count - 1; i >= 0; i--)
         {
             var conn = RoomPlayers[i].connectionToClient;
@@ -143,13 +142,20 @@ public class NetworkManagerLobby : NetworkManager
             NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
         }
 
-        base.ServerChangeScene(newSceneName);
+        ServerChangeScene("SampleScene");
     }
 
     public override void OnServerSceneChanged(string sceneName)
     {
-        spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
-        StartCoroutine(onCoroutine());
+        if (sceneName == "SampleScene")
+        {
+            spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
+            StartCoroutine(onCoroutine());
+        }
+        else if(sceneName == "WinScreen")
+        {
+            FindObjectOfType<WinScreenText>().DisplayName = winnerName;
+        }
     }
 
     public override void OnServerReady(NetworkConnection conn)
@@ -159,11 +165,54 @@ public class NetworkManagerLobby : NetworkManager
         OnServerReadied?.Invoke(conn);
     }
 
+    private bool wasCalled = false;
+
+    public void EndGame(string deadplayerName)
+    {
+        if(!wasCalled)
+        {
+            wasCalled = true;
+
+            StopAllCoroutines();
+
+            foreach (var con in NetworkServer.connections.Values)
+            {
+                if(con.identity.gameObject != null)
+                {
+                    var name = con.identity.gameObject.GetComponent<NetworkGamePlayerLobby>().GetDisplayName();
+                    if(name != deadplayerName)
+                    {
+                        winnerName = name;
+                    }
+                }
+            }
+
+            NetworkServer.connections.Values.ToList().ForEach(x =>
+            {
+                var gameplayerInstance = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "WinScreenPlayer"));
+
+                if ((x?.identity?.gameObject) != null)
+                {
+                    NetworkServer.Destroy(x.identity.gameObject);
+                }
+
+                NetworkServer.ReplacePlayerForConnection(x, gameplayerInstance.gameObject);
+            });
+
+            base.ServerChangeScene("WinScreen");
+        }
+    }
+
+    private bool isCoroutineRunning()
+    {
+        return !isCoroutineStopped;
+    }
+
     IEnumerator onCoroutine()
     {
         while (true)
         {
-            if (numPlayers == 0)
+            if (isCoroutineStopped)
             {
                 break;
             }
@@ -171,8 +220,6 @@ public class NetworkManagerLobby : NetworkManager
             var rnd = new System.Random();
             var spawnId = rnd.Next(0, spawners.Count);
             var directionSpawnId = (spawnId + spawners.Count / 2) % spawners.Count;
-
-            Debug.LogError(spawners[spawnId].position);
 
             var projectile = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Projectile"), new Vector3(spawners[spawnId].position.x, spawners[spawnId].position.y, 0), Quaternion.identity);
 

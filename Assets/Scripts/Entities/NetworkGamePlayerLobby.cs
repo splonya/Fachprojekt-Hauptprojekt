@@ -35,4 +35,10 @@ public class NetworkGamePlayerLobby : NetworkBehaviour
     {
         this.displayName = displayName;
     }
+
+    [Server]
+    public string GetDisplayName()
+    {
+        return displayName;
+    }
 }

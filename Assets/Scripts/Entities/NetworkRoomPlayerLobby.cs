@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class NetworkRoomPlayerLobby : NetworkBehaviour
@@ -50,6 +51,11 @@ public class NetworkRoomPlayerLobby : NetworkBehaviour
         Room.RoomPlayers.Add(this);
 
         UpdateDisplay();
+
+        if(SceneManager.GetActiveScene().name == "WinScreen")
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public override void OnStopClient()

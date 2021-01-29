@@ -221,6 +221,7 @@ MonoBehaviour:
     type: 3}
   projectilePrefab: {fileID: 592438282305094925, guid: 58f0b79c49b2901409e2fed806c48ed7,
     type: 3}
+  projectileVelocity: 1
 --- !u!4 &842740409
 Transform:
   m_ObjectHideFlags: 0
