@@ -217,7 +217,7 @@ MonoBehaviour:
   menuScene: Assets/Scenes/MainMenu.unity
   roomPlayerPrefab: {fileID: 2011511554254789925, guid: 597ce7371c289ed42b7868d4445a2783,
     type: 3}
-  gamePlayerPrefab: {fileID: 948072490664623793, guid: 33758602d4b357b47a898786affd550b,
+  gamePlayerPrefab: {fileID: 7907268315640045556, guid: 33758602d4b357b47a898786affd550b,
     type: 3}
   projectilePrefab: {fileID: 592438282305094925, guid: 58f0b79c49b2901409e2fed806c48ed7,
     type: 3}

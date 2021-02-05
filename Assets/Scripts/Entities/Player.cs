@@ -11,10 +11,22 @@ public class Player : NetworkBehaviour
 
     public Rigidbody2D rb;
 
-    private Vector2 moveVelocity;
+    public Animator animator;
+
+    Vector3 characterScale;
+    float characterScaleX;
 
     [SyncVar(hook = nameof(SetColor))]
     private Color currentColor = Color.black;
+
+
+    void Start()
+    {
+        characterScale = transform.localScale;
+        characterScaleX = characterScale.x;
+
+    }
+
 
     public override void OnStartServer()
     {
@@ -47,7 +59,22 @@ public class Player : NetworkBehaviour
     void FixedUpdate()
     {
         if (isLocalPlayer)
-            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")) * speed * Time.fixedDeltaTime;
+        {
+            animator.SetFloat("Horizontal", Input.GetAxis("Horizontal"));
+           
+            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), 0) * speed * Time.fixedDeltaTime;
+
+            if (Input.GetAxis("Horizontal") < 0)
+            {
+                characterScale.x = -characterScaleX;
+            }
+            if (Input.GetAxis("Horizontal") > 0)
+            {
+                characterScale.x = characterScaleX;
+            }
+            transform.localScale = characterScale;
+        }
+          
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

@@ -137,8 +137,7 @@ public class NetworkManagerLobby : NetworkManager
             var gameplayerInstance = Instantiate(gamePlayerPrefab);
             gameplayerInstance.SetDisplayName(RoomPlayers[i].DisplayName);
 
-            NetworkServer.Destroy(conn.identity.gameObject);
-
+           //NetworkServer.Destroy(conn.identity.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
         }
 
@@ -150,7 +149,7 @@ public class NetworkManagerLobby : NetworkManager
         if (sceneName == "SampleScene")
         {
             spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
-            StartCoroutine(onCoroutine());
+            //StartCoroutine(onCoroutine());
         }
         else if(sceneName == "WinScreen")
         {
