@@ -89,6 +89,6 @@ public class Player : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.LogError(collision.gameObject.name);
+        //Debug.LogError(collision.gameObject.name);
     }
 }

@@ -237,9 +237,9 @@ public class NetworkManagerLobby : NetworkManager
 
             NetworkServer.Spawn(projectile);
 
-            var delayTime = rnd.Next(1, 3);
+            //var delayTime = rnd.Next(1, 3);
 
-            yield return new WaitForSeconds(delayTime);
+            yield return new WaitForSeconds(1);
         }
     }
 }

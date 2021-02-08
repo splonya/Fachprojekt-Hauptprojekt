@@ -31,8 +31,8 @@ public class Projectile : NetworkBehaviour
     {
         if (!col.gameObject.CompareTag("projectile"))
         {
-            //NetworkServer.Destroy(col.gameObject);
-            //(NetworkManager.singleton as NetworkManagerLobby).EndGame(col.gameObject.GetComponent<NetworkGamePlayerLobby>().GetDisplayName());
+            NetworkServer.Destroy(col.gameObject);
+            (NetworkManager.singleton as NetworkManagerLobby).EndGame(col.gameObject.GetComponent<NetworkGamePlayerLobby>().GetDisplayName());
         }
     }
 }
