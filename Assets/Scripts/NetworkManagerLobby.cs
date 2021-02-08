@@ -32,6 +32,7 @@ public class NetworkManagerLobby : NetworkManager
     public List<NetworkGamePlayerLobby> GamePlayers { get; } = new List<NetworkGamePlayerLobby>();
 
     private List<Transform> spawners = new List<Transform>();
+    private List<Transform> playerPositions = new List<Transform>();
 
     public override void OnStartServer() => spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList();
 
@@ -131,11 +132,14 @@ public class NetworkManagerLobby : NetworkManager
     {
         if (!IsReadyToStart()) { return; }
 
+        playerPositions = GameObject.FindGameObjectsWithTag("PlayerPos").Select(x => x.transform).ToList();
+
         for (int i = RoomPlayers.Count - 1; i >= 0; i--)
         {
             var conn = RoomPlayers[i].connectionToClient;
-            var gameplayerInstance = Instantiate(gamePlayerPrefab);
+            var gameplayerInstance = Instantiate(gamePlayerPrefab, playerPositions[i].position, Quaternion.identity);
             gameplayerInstance.SetDisplayName(RoomPlayers[i].DisplayName);
+            
 
            //NetworkServer.Destroy(conn.identity.gameObject);
             NetworkServer.ReplacePlayerForConnection(conn, gameplayerInstance.gameObject);
@@ -148,8 +152,9 @@ public class NetworkManagerLobby : NetworkManager
     {
         if (sceneName == "SampleScene")
         {
-            spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).ToList();
-            //StartCoroutine(onCoroutine());
+            spawners = GameObject.FindGameObjectsWithTag("Respawn").Select(x => x.transform).OrderBy(x => int.Parse(x.name.Replace("Spawn", ""))).ToList();
+
+            StartCoroutine(onCoroutine());
         }
         else if(sceneName == "WinScreen")
         {
@@ -217,8 +222,8 @@ public class NetworkManagerLobby : NetworkManager
             }
 
             var rnd = new System.Random();
-            var spawnId = rnd.Next(0, spawners.Count);
-            var directionSpawnId = (spawnId + spawners.Count / 2) % spawners.Count;
+            var spawnId = rnd.Next(0, 6);
+            var directionSpawnId = 11 - spawnId;
 
             var projectile = Instantiate(spawnPrefabs.Find(prefab => prefab.name == "Projectile"), new Vector3(spawners[spawnId].position.x, spawners[spawnId].position.y, 0), Quaternion.identity);
 
