@@ -60,7 +60,17 @@ public class Player : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            animator.SetFloat("Horizontal", Input.GetAxis("Horizontal"));
+            if(Input.GetAxis("Horizontal") != 0)
+            {
+                Debug.Log(Input.GetAxis("Horizontal"));
+                animator.SetBool("IsRunning", true);
+            }
+            else
+            {
+                Debug.Log("DRIIIIINNNNN");
+                animator.SetBool("IsRunning", false);
+            }
+            
            
             rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal"), 0) * speed * Time.fixedDeltaTime;
 
